@@ -7,17 +7,47 @@
 
 namespace wjg {
 
+namespace internal {
+
+#if defined __has_builtin && __has_builtin(__builtin_add_overflow_p)
+constexpr bool has_builtin_add_overflow_p = true;
+#else
+constexpr bool has_builtin_add_overflow_p = false;
+#endif
+
+} // namespace internal
+
 template <class R, class A>
 constexpr bool can_convert(A a) noexcept;
 
 template <class R, class A>
 constexpr bool can_convert_modular(A a) noexcept;
 
-template <class A>
-constexpr bool can_increment(A a) noexcept;
+/**
+ * Determines whether the the result of evaluating the expression ++a matches the result of
+ * evaluating the corresponding mathematical operation a + 1.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
+template <std::integral A>
+constexpr bool can_increment(A a) noexcept
+{
+    return a < std::numeric_limits<A>::max();
+}
 
-template <class A>
-constexpr bool can_decrement(A a) noexcept;
+/**
+ * Determines whether the the result of evaluating the expression --a matches the result of
+ * evaluating the corresponding mathematical operation a - 1.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
+template <std::integral A>
+constexpr bool can_decrement(A a) noexcept
+{
+    return a > std::numeric_limits<A>::min();
+}
 
 template <class A>
 constexpr bool can_promote(A a) noexcept;
@@ -161,19 +191,8 @@ constexpr bool can_bitwise_xor_in_place_modular(A a, B b) noexcept;
 
 template <class A, class B>
 constexpr bool can_bitwise_or_in_place_modular(A a, B b) noexcept;
-
-namespace internal {
-#if defined __has_builtin && __has_builtin(__builtin_add_overflow_p)
-constexpr bool has_builtin_add_overflow_p = true;
-#else
-constexpr bool has_builtin_add_overflow_p = false;
-#endif
-} // namespace internal
 } // namespace wjg
 
-/* wjg::can_add() template specialisations */
-
-// Specialisation for two unsigned integers of the same type.
 template <std::unsigned_integral T>
 constexpr bool wjg::can_add(const T a, const T b) noexcept
 {
@@ -185,6 +204,6 @@ constexpr bool wjg::can_add(const T a, const T b) noexcept
     }
 }
 
-// To implement: two unsigned integers of different widths (wid A < wid B and wid B < wid A)
+// To implement: specialisations for two unsigned integers of different widths (wid A < wid B and wid B < wid A)
 
 #endif
