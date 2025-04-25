@@ -2,7 +2,6 @@
 #define _WJG_BOUNDARY_CONDITIONS_HPP_
 
 #include <concepts>
-#include <cstdint>
 #include <limits>
 #include <utility>
 
