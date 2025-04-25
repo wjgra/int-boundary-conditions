@@ -4,7 +4,6 @@
 #include <concepts>
 #include <cstdint>
 #include <limits>
-#include <print> // temp
 #include <utility>
 
 namespace wjg {
@@ -30,24 +29,25 @@ struct promoted_type {
     }());
 };
 
-enum class int_conversion_rank { signed_char_r, short_r, int_r, long_r, long_long_r };
-
-template <std::integral A>
-constexpr int_conversion_rank integer_conversion_rank(A a) noexcept;
+enum class int_conversion_rank { char_r, short_r, int_r, long_r, long_long_r };
 
 // clang-format off
-// wjg - I guess these could be traits classes too, I'd just have to explicitly instantiate them
-constexpr auto integer_conversion_rank(char) noexcept { return int_conversion_rank::signed_char_r; }
-constexpr auto integer_conversion_rank(unsigned char) noexcept { return int_conversion_rank::signed_char_r; }
-constexpr auto integer_conversion_rank(signed char) noexcept { return int_conversion_rank::signed_char_r; }
-constexpr auto integer_conversion_rank(unsigned short) noexcept { return int_conversion_rank::short_r; }
-constexpr auto integer_conversion_rank(signed short) noexcept { return int_conversion_rank::short_r; }
-constexpr auto integer_conversion_rank(unsigned int) noexcept { return int_conversion_rank::int_r; }
-constexpr auto integer_conversion_rank(signed int) noexcept { return int_conversion_rank::int_r; }
-constexpr auto integer_conversion_rank(unsigned long) noexcept { return int_conversion_rank::long_r; }
-constexpr auto integer_conversion_rank(signed long) noexcept { return int_conversion_rank::long_r; }
-constexpr auto integer_conversion_rank(unsigned long long) noexcept { return int_conversion_rank::long_long_r; }
-constexpr auto integer_conversion_rank(signed long long) noexcept { return int_conversion_rank::long_long_r; }
+template <std::integral A>
+struct integer_conversion_rank {
+    constexpr static int_conversion_rank value = [] -> auto {
+        if      constexpr (std::same_as<A, char>)           { return int_conversion_rank::char_r; }
+        else if constexpr (std::same_as<A, unsigned char>)  { return int_conversion_rank::char_r; }
+        else if constexpr (std::same_as<A, signed char>)    { return int_conversion_rank::char_r; }
+        else if constexpr (std::same_as<A, unsigned short>) { return int_conversion_rank::short_r; }
+        else if constexpr (std::same_as<A, signed short>)   { return int_conversion_rank::short_r; }
+        else if constexpr (std::same_as<A, unsigned int>)   { return int_conversion_rank::int_r; }
+        else if constexpr (std::same_as<A, signed int>)     { return int_conversion_rank::int_r; }
+        else if constexpr (std::same_as<A, unsigned long>)  { return int_conversion_rank::long_r; }
+        else if constexpr (std::same_as<A, signed long>)    { return int_conversion_rank::long_r; }
+        else if constexpr (std::same_as<A, long long>)      { return int_conversion_rank::long_long_r; }
+        else if constexpr (std::same_as<A, long long>)      { return int_conversion_rank::long_long_r; }
+    }();
+};
 // clang-format on
 
 // WJG: consider whether the promotion should be taken out of this...
@@ -57,13 +57,11 @@ private:
     using A1 = promoted_type<A>::name;
     using B1 = promoted_type<B>::name;
     using greater_rank = decltype([] -> auto {
-        constexpr A1 a1{};
-        constexpr B1 b1{};
-        if constexpr (integer_conversion_rank(a1) > integer_conversion_rank(b1)) {
-            return a1;
+        if constexpr (integer_conversion_rank<A1>::value > integer_conversion_rank<B1>::value) {
+            return A1{};
         }
         else {
-            return b1;
+            return B1{};
         }
     }());
 
@@ -96,16 +94,14 @@ public:
                 }
             });
 
-            constexpr U u{};
-            constexpr S s{};
-            if constexpr (integer_conversion_rank(u) >= integer_conversion_rank(s)) {
-                return u;
+            if constexpr (integer_conversion_rank<U>::value >= integer_conversion_rank<S>::value) {
+                return U{};
             }
             else if constexpr (/* S can represent all values of U */
                                std::in_range<S>(std::numeric_limits<U>::max()) &&
                                std::in_range<S>(
                                    std::numeric_limits<U>::min())) { // zero is always in range...?
-                return s;
+                return S{};
             }
             else {
                 return std::make_unsigned<S>{};
@@ -132,9 +128,6 @@ constexpr bool can_convert_modular(A a) noexcept;
 template <std::integral A>
 constexpr bool can_increment(A a) noexcept
 {
-    // wjg: I'm not sure this handles out of range correctly if it ends up being negative - can
-    // promotion do that?
-    // return internal::promote(a) < std::numeric_limits<A>::max();
     using C = internal::common_type<A, decltype(1)>::name;
 
     // need to to the promotion separately and check whether we can promote - for now assume
