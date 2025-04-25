@@ -10,6 +10,59 @@ namespace wjg {
 
 namespace boundary_conditons {
 
+// Pre-declarations
+// clang-format off
+template <std::integral R, std::integral A> constexpr bool can_convert(A a)                             noexcept;
+template <std::integral R, std::integral A> constexpr bool can_convert_modular(A a)                     noexcept;
+template <std::integral A>                  constexpr bool can_increment(A a)                           noexcept;
+template <std::integral A>                  constexpr bool can_decrement(A a)                           noexcept;
+template <std::integral A>                  constexpr bool can_promote(A a)                             noexcept;
+template <std::integral A>                  constexpr bool can_negate(A a)                              noexcept;
+template <std::integral A>                  constexpr bool can_bitwise_not(A a)                         noexcept;
+template <std::integral A>                  constexpr bool can_increment_modular(A a)                   noexcept;
+template <std::integral A>                  constexpr bool can_decrement_modular(A a)                   noexcept;
+template <std::integral A>                  constexpr bool can_promote_modular(A a)                     noexcept;
+template <std::integral A>                  constexpr bool can_negate_modular(A a)                      noexcept;
+template <std::integral A>                  constexpr bool can_bitwise_not_modular(A a)                 noexcept;
+template <std::integral A, std::integral B> constexpr bool can_add(A a, B b)                            noexcept;
+template <std::integral A, std::integral B> constexpr bool can_subtract(A a, B b)                       noexcept;
+template <std::integral A, std::integral B> constexpr bool can_multiply(A a, B b)                       noexcept;
+template <std::integral A, std::integral B> constexpr bool can_divide(A a, B b)                         noexcept;
+template <std::integral A, std::integral B> constexpr bool can_take_remainder(A a, B b)                 noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_left(A a, B b)                     noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_right(A a, B b)                    noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_and(A a, B b)                    noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_xor(A a, B b)                    noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_or(A a, B b)                     noexcept;
+template <std::integral A, std::integral B> constexpr bool can_compare(A a, B b)                        noexcept;
+template <std::integral A, std::integral B> constexpr bool can_add_modular(A a, B b)                    noexcept;
+template <std::integral A, std::integral B> constexpr bool can_subtract_modular(A a, B b)               noexcept;
+template <std::integral A, std::integral B> constexpr bool can_multiply_modular(A a, B b)               noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_left_modular(A a, B b)             noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_right_modular(A a, B b)            noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_and_modular(A a, B b)            noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_xor_modular(A a, B b)            noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_or_modular(A a, B b)             noexcept;
+template <std::integral A, std::integral B> constexpr bool can_add_in_place(A a, B b)                   noexcept;
+template <std::integral A, std::integral B> constexpr bool can_subtract_in_place(A a, B b)              noexcept;
+template <std::integral A, std::integral B> constexpr bool can_multiply_in_place(A a, B b)              noexcept;
+template <std::integral A, std::integral B> constexpr bool can_divide_in_place(A a, B b)                noexcept;
+template <std::integral A, std::integral B> constexpr bool can_take_remainder_in_place(A a, B b)        noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_left_in_place(A a, B b)            noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_right_in_place(A a, B b)           noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_and_in_place(A a, B b)           noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_xor_in_place(A a, B b)           noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_or_in_place(A a, B b)            noexcept;
+template <std::integral A, std::integral B> constexpr bool can_add_in_place_modular(A a, B b)           noexcept;
+template <std::integral A, std::integral B> constexpr bool can_subtract_in_place_modular(A a, B b)      noexcept;
+template <std::integral A, std::integral B> constexpr bool can_multiply_in_place_modular(A a, B b)      noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_left_in_place_modular(A a, B b)    noexcept;
+template <std::integral A, std::integral B> constexpr bool can_shift_right_in_place_modular(A a, B b)   noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_and_in_place_modular(A a, B b)   noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_xor_in_place_modular(A a, B b)   noexcept;
+template <std::integral A, std::integral B> constexpr bool can_bitwise_or_in_place_modular(A a, B b)    noexcept;
+// clang-format on
+
 namespace internal {
 
 #if defined __has_builtin && __has_builtin(__builtin_add_overflow_p)
@@ -23,98 +76,23 @@ constexpr bool has_builtin_add_overflow_p = false;
  */
 template <std::integral A>
 struct promoted_type {
-    using name = decltype([] -> auto {
-        return +A{};
-    }());
+    using name = decltype(+A{});
 };
 
-enum class int_conversion_rank { char_r, short_r, int_r, long_r, long_long_r };
-
-// clang-format off
-template <std::integral A>
-struct integer_conversion_rank {
-    constexpr static int_conversion_rank value = [] -> auto {
-        if      constexpr (std::same_as<A, char>)           { return int_conversion_rank::char_r; }
-        else if constexpr (std::same_as<A, unsigned char>)  { return int_conversion_rank::char_r; }
-        else if constexpr (std::same_as<A, signed char>)    { return int_conversion_rank::char_r; }
-        else if constexpr (std::same_as<A, unsigned short>) { return int_conversion_rank::short_r; }
-        else if constexpr (std::same_as<A, signed short>)   { return int_conversion_rank::short_r; }
-        else if constexpr (std::same_as<A, unsigned int>)   { return int_conversion_rank::int_r; }
-        else if constexpr (std::same_as<A, signed int>)     { return int_conversion_rank::int_r; }
-        else if constexpr (std::same_as<A, unsigned long>)  { return int_conversion_rank::long_r; }
-        else if constexpr (std::same_as<A, signed long>)    { return int_conversion_rank::long_r; }
-        else if constexpr (std::same_as<A, long long>)      { return int_conversion_rank::long_long_r; }
-        else if constexpr (std::same_as<A, long long>)      { return int_conversion_rank::long_long_r; }
-    }();
-};
-// clang-format on
-
-// WJG: consider whether the promotion should be taken out of this...
+/**
+ * @brief Traits class for retrieving the common type of a binary arithmetic operation.
+ */
 template <std::integral A, std::integral B>
 struct common_type {
-private:
-    using A1 = promoted_type<A>::name;
-    using B1 = promoted_type<B>::name;
-    using greater_rank = decltype([] -> auto {
-        if constexpr (integer_conversion_rank<A1>::value > integer_conversion_rank<B1>::value) {
-            return A1{};
-        }
-        else {
-            return B1{};
-        }
-    }());
-
-public:
-    using name = decltype([] -> auto {
-        if constexpr (std::is_same<A1, B1>::value) {
-            return A1{};
-        }
-        else if constexpr ((std::signed_integral<A1> && std::signed_integral<B1>) ||
-                           (std::unsigned_integral<A1> && std::unsigned_integral<B1>)) {
-            return greater_rank{};
-        }
-        else {
-            // At this point, exactly one type is signed and exactly one is unsigned
-            using U = decltype([] -> auto {
-                if constexpr (std::signed_integral<A1>) {
-                    return A1{};
-                }
-                else {
-                    return B1{};
-                }
-            });
-
-            using S = decltype([] -> auto {
-                if constexpr (std::unsigned_integral<A1>) {
-                    return A1{};
-                }
-                else {
-                    return B1{};
-                }
-            });
-
-            if constexpr (integer_conversion_rank<U>::value >= integer_conversion_rank<S>::value) {
-                return U{};
-            }
-            else if constexpr (/* S can represent all values of U */
-                               std::in_range<S>(std::numeric_limits<U>::max()) &&
-                               std::in_range<S>(
-                                   std::numeric_limits<U>::min())) { // zero is always in range...?
-                return S{};
-            }
-            else {
-                return std::make_unsigned<S>{};
-            }
-        }
-    }());
+    using name = decltype(A{} + B{});
 };
 
 } // namespace internal
 
-template <class R, class A>
+template <std::integral R, std::integral A>
 constexpr bool can_convert(A a) noexcept;
 
-template <class R, class A>
+template <std::integral R, std::integral A>
 constexpr bool can_convert_modular(A a) noexcept;
 
 /**
@@ -127,12 +105,7 @@ constexpr bool can_convert_modular(A a) noexcept;
 template <std::integral A>
 constexpr bool can_increment(A a) noexcept
 {
-    using C = internal::common_type<A, decltype(1)>::name;
-
-    // need to to the promotion separately and check whether we can promote - for now assume
-    // promotion was okay
-    return static_cast<C>(+a) < std::numeric_limits<C>::max() &&
-           std::in_range<A>(static_cast<C>(+a) + static_cast<C>(+1));
+    return can_add_in_place(a, 1);
 }
 
 /**
@@ -145,12 +118,7 @@ constexpr bool can_increment(A a) noexcept
 template <std::integral A>
 constexpr bool can_decrement(A a) noexcept
 {
-    using C = internal::common_type<A, decltype(1)>::name;
-
-    // need to to the promotion separately and check whether we can promote - for now assume
-    // promotion was okay
-    return static_cast<C>(+a) > std::numeric_limits<C>::min() &&
-           std::in_range<A>(static_cast<C>(+a) - static_cast<C>(+1));
+    return can_subtract_in_place(a, 1);
 }
 
 /**
@@ -163,28 +131,28 @@ constexpr bool can_decrement(A a) noexcept
 template <std::integral A>
 constexpr bool can_promote(A a) noexcept
 {
-    return std::in_range<internal::promoted_type<A>::name>(a);
+    return std::in_range<typename internal::promoted_type<A>::name>(a);
 }
 
-template <class A>
+template <std::integral A>
 constexpr bool can_negate(A a) noexcept;
 
-template <class A>
+template <std::integral A>
 constexpr bool can_bitwise_not(A a) noexcept;
 
-template <class A>
+template <std::integral A>
 constexpr bool can_increment_modular(A a) noexcept;
 
-template <class A>
+template <std::integral A>
 constexpr bool can_decrement_modular(A a) noexcept;
 
-template <class A>
+template <std::integral A>
 constexpr bool can_promote_modular(A a) noexcept;
 
-template <class A>
+template <std::integral A>
 constexpr bool can_negate_modular(A a) noexcept;
 
-template <class A>
+template <std::integral A>
 constexpr bool can_bitwise_not_modular(A a) noexcept;
 
 /**
@@ -195,132 +163,195 @@ constexpr bool can_bitwise_not_modular(A a) noexcept;
  * @return true if the result of evaluating the expression matches the result of evaluating the
  * corresponding mathematical operation, false otherwise.
  */
-template <class A, class B>
-constexpr bool can_add(A a, B b) noexcept;
+template <std::integral A, std::integral B>
+constexpr bool can_add(A a, B b) noexcept
+{
+    // Use built-in if available
+    if constexpr (wjg::boundary_conditons::internal::has_builtin_add_overflow_p) {
+        return __builtin_add_overflow_p(a, b, 0) == false;
+    }
 
-template <class A, class B>
-constexpr bool can_subtract(A a, B b) noexcept;
+    using C = internal::common_type<A, B>::name;
 
-template <class A, class B>
+    if (!can_promote(a) || !can_promote(b)) {
+        return false;
+    }
+
+    const auto promoted_a = static_cast<C>(+a);
+    const auto promoted_b = static_cast<C>(+b);
+
+    // Check result fits in common type C
+    if (promoted_b > 0 && promoted_a > (std::numeric_limits<C>::max() - promoted_b)) {
+        return false;
+    }
+    if (promoted_b < 0 && promoted_a < (std::numeric_limits<C>::min() - promoted_b)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Determines whether the the result of evaluating the expression a - b matches the result of
+ * evaluating the corresponding mathematical operation a - b.
+ * @param a the first integer
+ * @param b the second integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
+template <std::integral A, std::integral B>
+constexpr bool can_subtract(A a, B b) noexcept
+{
+    // Use built-in if available
+    if constexpr (wjg::boundary_conditons::internal::has_builtin_add_overflow_p) {
+        return __builtin_add_overflow_p(a, b, 0) == false;
+    }
+
+    using C = internal::common_type<A, B>::name;
+
+    if (!can_promote(a) || !can_promote(b)) {
+        return false;
+    }
+
+    const auto promoted_a = static_cast<C>(+a);
+    const auto promoted_b = static_cast<C>(+b);
+
+    // Check result fits in common type C
+    if (promoted_b > 0 && promoted_a < (std::numeric_limits<C>::max() + promoted_b)) {
+        return false;
+    }
+    if (promoted_b < 0 && promoted_a > (std::numeric_limits<C>::min() + promoted_b)) {
+        return false;
+    }
+    return true;
+}
+
+template <std::integral A, std::integral B>
 constexpr bool can_multiply(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_divide(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_take_remainder(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_left(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_right(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_and(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_xor(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_or(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_compare(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_add_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_subtract_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_multiply_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_left_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_right_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_and_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_xor_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_or_modular(A a, B b) noexcept;
 
-template <class A, class B>
-constexpr bool can_add_in_place(A a, B b) noexcept;
+/**
+ * @brief Determines whether the the result of evaluating the expression a += b matches the result
+ * of evaluating the corresponding mathematical operation a + b.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
+template <std::integral A, std::integral B>
+constexpr bool can_add_in_place(A a, B b) noexcept
+{
+    return can_add(a, b) && std::in_range<A>(a + b);
+}
 
-template <class A, class B>
-constexpr bool can_subtract_in_place(A a, B b) noexcept;
+/**
+ * @brief Determines whether the the result of evaluating the expression a -= b matches the result
+ * of evaluating the corresponding mathematical operation a - b.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
+template <std::integral A, std::integral B>
+constexpr bool can_subtract_in_place(A a, B b) noexcept
+{
+    return can_subtract(a, b) && std::in_range<A>(a - b);
+}
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_multiply_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_divide_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_take_remainder_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_left_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_right_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_and_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_xor_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_or_in_place(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_add_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_subtract_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_multiply_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_left_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_shift_right_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_and_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_xor_in_place_modular(A a, B b) noexcept;
 
-template <class A, class B>
+template <std::integral A, std::integral B>
 constexpr bool can_bitwise_or_in_place_modular(A a, B b) noexcept;
 
 } // namespace boundary_conditons
 
 } // namespace wjg
-
-template <std::integral T>
-constexpr bool wjg::boundary_conditons::can_add(const T a, const T b) noexcept
-{
-    // need to handle promotion
-    if constexpr (wjg::boundary_conditons::internal::has_builtin_add_overflow_p) {
-        return __builtin_add_overflow_p(a, b, static_cast<T>(0)) == false;
-    }
-    else {
-        // TO IMPLEMENT
-        return false;
-    }
-}
 
 #endif
