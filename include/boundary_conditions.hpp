@@ -24,8 +24,7 @@ constexpr bool has_builtin_add_overflow_p = false;
 template <std::integral A>
 struct promoted_type {
     using name = decltype([] -> auto {
-        A a;
-        return +a;
+        return +A{};
     }());
 };
 
