@@ -1,22 +1,19 @@
 # Implementation of P1619R2: Functions for Testing Boundary Conditions on Integer Operations
-As of April 2025, P1619R2 does not currently have a public implementation. This repo seeks to address this deficiency.
+C++ proposal paper [PR1619R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1619r2.pdf) describes a set of library functions that indicate whether arithmetic expressions on integers match the corresponding mathematical statement. For instance, C++'s addition of signed integers matches 'mathematical' addition over the set of integers if and only if there is no over/underflow.
 
-## Background (TBC)
-To discuss:
-- the proposal paper
-- C: chk_add etc.
-- any similar libraries that exist
-- the importance of optimal code generation
+This seems like an interesting proposal to help navigate some of the more difficult edge cases of the language but, as of April 2025, there does not appear to be a public implementation. The goal of this repo is to get a basic cross-platform implementation in place and to start to think about how the code generation can be optimised.
+
+Note that this proposal takes a somewhat different approach to, say, C23's checked arithmetic (proposed for inclusion in C++ in [PR3370R0](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p3370r0.html)) or [the Boost equivalent](https://live.boost.org/doc/libs/1_81_0/libs/safe_numerics/doc/html/checked_arithmetic.html). Whilst those solutions perform the operation in question and return an error code/null value in the case that the operation does not agree with the mathetical equivalent, this proposal instead takes the form of boolean predicates suitable for inclusion in assertions or contracts. I do not have strong feelings as to which approach is better, but thought it would be interesting exericse to implement this proposal irrespective of how useful I think it is. On balance, I think that there is probably an argument for both approaches being included in the standard library in some way - though we'll see what happens!
 
 ## Implementation status
 
-| Function | Implemented? |
-| -------- | ------------ |
-| can_convert | ✅ |
+| Function | Implemented? | Notes |
+| -------- | ------------ | ----- |
+| can_convert | ✅ | Trivial range check using the result type.
 | can_convert_modular | ❌ |
 | can_increment | ✅ |
 | can_decrement | ✅ |
-| can_promote | ✅ |
+| can_promote | ✅ | Trivial range check using the promoted type.
 | can_negate | ❌ |
 | can_bitwise_not | ❌ |
 | can_increment_modular | ❌ |
@@ -24,8 +21,8 @@ To discuss:
 | can_promote_modular | ❌ |
 | can_negate_modular | ❌ |
 | can_bitwise_not_modular | ❌ |
-| can_add | ✅ |
-| can_subtract | ✅ |
+| can_add | ✅ | Makes use of the [`__builtin_add_overflow_p` intrinsic](https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html) if available, which seems to be well-optimised on GCC. Otherwise the promotions, conversions and bounds checks are performed explictitly (further work is required to improve the code generation here). An alternative approach modelled on the description of this intrinsic would be to convert to a large int type to perform the calculation then cast back to the result type to check agreement.
+| can_subtract | ✅ | Similar considerations as for `can_add`.
 | can_multiply | ❌ |
 | can_divide | ❌ |
 | can_take_remainder | ❌ |
