@@ -12,7 +12,7 @@ To discuss:
 
 | Function | Implemented? |
 | -------- | ------------ |
-| can_convert | ❌ |
+| can_convert | ✅ |
 | can_convert_modular | ❌ |
 | can_increment | ✅ |
 | can_decrement | ✅ |

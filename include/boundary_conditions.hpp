@@ -9,7 +9,6 @@ namespace wjg {
 
 namespace boundary_conditons {
 
-// Pre-declarations
 // clang-format off
 template <std::integral R, std::integral A> constexpr bool can_convert(A a)                             noexcept;
 template <std::integral R, std::integral A> constexpr bool can_convert_modular(A a)                     noexcept;
@@ -64,12 +63,6 @@ template <std::integral A, std::integral B> constexpr bool can_bitwise_or_in_pla
 
 namespace internal {
 
-#if defined __has_builtin && __has_builtin(__builtin_add_overflow_p)
-constexpr bool has_builtin_add_overflow_p = true;
-#else
-constexpr bool has_builtin_add_overflow_p = false;
-#endif
-
 /**
  * @brief Traits class for retrieving the type resulting from an integral promotion.
  */
@@ -86,10 +79,74 @@ struct common_type {
     using name = decltype(A{} + B{});
 };
 
+#if defined __has_builtin && __has_builtin(__builtin_add_overflow_p)
+/**
+ * @brief Helper function wrapper for add intrinsic.
+ */
+template <std::integral A, std::integral B>
+constexpr bool builtin_can_add(A a, B b) noexcept
+{
+    return __builtin_add_overflow_p(a, b, typename common_type<A, B>::name{}) == false;
+}
+#endif
+
+#if !defined WJG_BOUNDARY_CONDITIONS_NO_BUILTINS && defined __has_builtin && \
+    __has_builtin(__builtin_add_overflow_p)
+constexpr bool has_builtin_add_overflow_p = true;
+#else
+constexpr bool has_builtin_add_overflow_p = false;
+#endif
+
+#if defined __has_builtin && __has_builtin(__builtin_sub_overflow_p)
+/**
+ * @brief Helper function wrapper for sub intrinsic.
+ */
+template <std::integral A, std::integral B>
+constexpr bool builtin_can_sub(A a, B b) noexcept
+{
+    return __builtin_sub_overflow_p(a, b, typename common_type<A, B>::name{}) == false;
+}
+#endif
+
+#if !defined WJG_BOUNDARY_CONDITIONS_NO_BUILTINS && defined __has_builtin && \
+    __has_builtin(__builtin_sub_overflow_p)
+constexpr bool has_builtin_sub_overflow_p = true;
+#else
+constexpr bool has_builtin_sub_overflow_p = false;
+#endif
+
+#if defined __has_builtin && __has_builtin(__builtin_mul_overflow_p)
+/**
+ * @brief Helper function wrapper for mul intrinsic.
+ */
+template <std::integral A, std::integral B>
+constexpr bool builtin_can_mul(A a, B b) noexcept
+{
+    return __builtin_mul_overflow_p(a, b, typename common_type<A, B>::name{}) == false;
+}
+#endif
+
+#if !defined WJG_BOUNDARY_CONDITIONS_NO_BUILTINS && defined __has_builtin && \
+    __has_builtin(__builtin_mul_overflow_p)
+constexpr bool has_builtin_mul_overflow_p = true;
+#else
+constexpr bool has_builtin_mul_overflow_p = false;
+#endif
+
 } // namespace internal
 
+/**
+ * @brief Determines whether the the result of evaluating the expression static_cast<R>(a) matches
+ * the result of evaluating the corresponding mathematical operation a + 1.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
 template <std::integral R, std::integral A>
-constexpr bool can_convert(A a) noexcept;
+constexpr bool can_convert(A a) noexcept
+{
+    return std::in_range<R>(a);
+}
 
 template <std::integral R, std::integral A>
 constexpr bool can_convert_modular(A a) noexcept;
@@ -166,8 +223,8 @@ template <std::integral A, std::integral B>
 constexpr bool can_add(A a, B b) noexcept
 {
     // Use built-in if available
-    if constexpr (wjg::boundary_conditons::internal::has_builtin_add_overflow_p) {
-        return __builtin_add_overflow_p(a, b, 0) == false;
+    if constexpr (internal::has_builtin_add_overflow_p) {
+        return internal::builtin_can_add(a, b);
     }
 
     using C = internal::common_type<A, B>::name;
@@ -176,6 +233,7 @@ constexpr bool can_add(A a, B b) noexcept
         return false;
     }
 
+    // Get the values of a and b after integer promotion and usual arithmetic conversion.
     const auto promoted_a = static_cast<C>(+a);
     const auto promoted_b = static_cast<C>(+b);
 
@@ -201,8 +259,8 @@ template <std::integral A, std::integral B>
 constexpr bool can_subtract(A a, B b) noexcept
 {
     // Use built-in if available
-    if constexpr (wjg::boundary_conditons::internal::has_builtin_add_overflow_p) {
-        return __builtin_add_overflow_p(a, b, 0) == false;
+    if constexpr (internal::has_builtin_sub_overflow_p) {
+        return internal::builtin_can_sub(a, b);
     }
 
     using C = internal::common_type<A, B>::name;
@@ -211,6 +269,7 @@ constexpr bool can_subtract(A a, B b) noexcept
         return false;
     }
 
+    // Get the values of a and b after integer promotion and usual arithmetic conversion.
     const auto promoted_a = static_cast<C>(+a);
     const auto promoted_b = static_cast<C>(+b);
 
