@@ -17,7 +17,7 @@ On balance, I think there is probably space for both 'check-after' and 'check-be
 | can_convert_modular | ❌ |
 | can_increment | ✅ |
 | can_decrement | ✅ |
-| can_promote | ✅ | Trivial range check using the promoted type.
+| can_promote | ✅ | Trivial range check using the promoted type. On most platforms, this reduces to `return true`, but there are some tricky cases where integers have unusual numbers padding bits (see the proposal paper for an example).
 | can_negate | ❌ |
 | can_bitwise_not | ❌ |
 | can_increment_modular | ❌ |
