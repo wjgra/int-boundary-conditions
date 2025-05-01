@@ -1,5 +1,5 @@
 # Implementation of P1619R2: Functions for Testing Boundary Conditions on Integer Operations
-[![clang-format](https://github.com/wjgra/int-boundary-conditions/actions/workflows/format.yml/badge.svg)](https://github.com/wjgra/int-boundary-conditions/actions/workflows/format.yml)
+[![Unit tests (GCC 14 - debug)](https://github.com/wjgra/int-boundary-conditions/actions/workflows/unit_tests_debug.yml/badge.svg)](https://github.com/wjgra/int-boundary-conditions/actions/workflows/unit_tests_debug.yml) [![Unit tests (GCC 14 - release)](https://github.com/wjgra/int-boundary-conditions/actions/workflows/unit_tests_release.yml/badge.svg)](https://github.com/wjgra/int-boundary-conditions/actions/workflows/unit_tests_release.yml) [![clang-format](https://github.com/wjgra/int-boundary-conditions/actions/workflows/format.yml/badge.svg)](https://github.com/wjgra/int-boundary-conditions/actions/workflows/format.yml)
 
 C++ proposal paper [PR1619R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1619r2.pdf) describes a set of library functions that indicate whether arithmetic expressions on integers match the corresponding mathematical statement. For instance, C++'s addition of signed integers matches 'mathematical' addition over the set of integers if and only if there is no over/underflow.
 
