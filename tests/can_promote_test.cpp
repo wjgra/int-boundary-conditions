@@ -3,14 +3,16 @@
 
 #include "boundary_conditions.hpp"
 
-// Open question: how should we test for correctness on unusual platforms? For instance, int types with extra padding bits.
+// Open question: how should we test for correctness on unusual platforms? For instance, int types
+// with extra padding bits.
 
 template <std::integral T>
 void can_promote_test_exhaustive()
 {
     for (const auto i : std::views::iota(std::numeric_limits<T>::min())) {
         REQUIRE(wjg::boundary_conditons::can_promote(i));
-        if (i == std::numeric_limits<T>::max()) break;
+        if (i == std::numeric_limits<T>::max())
+            break;
     }
 }
 
@@ -54,3 +56,4 @@ TEST_CASE("can_promote_i16")
     can_promote_test_exhaustive<int16_t>();
 }
 
+// TO DO: non-exhaustive test cases for larger int types
