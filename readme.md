@@ -18,7 +18,7 @@ On balance, I think there is probably space for both 'check-after' and 'check-be
 | can_increment | ✅ |
 | can_decrement | ✅ |
 | can_promote | ✅ | Trivial range check using the promoted type. On most platforms, this reduces to `return true`, but there are some tricky cases where integers have unusual numbers padding bits (see the proposal paper for an example).
-| can_negate | ❌ |
+| can_negate | ✅ | [This excerpt](https://en.cppreference.com/w/cpp/language/operator_arithmetic#:~:text=The%20result%20of%20the%20built%2Din%20negation,is%20the%20number%20of%20bits%20after%20promotion.) from cppreference seems to be inaccurate - the second sentence should probably read *"~~For unsigned a~~ <ins>If the type of a (possibly after promotion) is unsigned</ins>, the value of -a is 2^N - 1, where N is the number of bits after promotion"*. It would be worth checking what the standard says! 
 | can_bitwise_not | ❌ |
 | can_increment_modular | ❌ |
 | can_decrement_modular | ❌ |

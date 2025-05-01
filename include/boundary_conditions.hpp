@@ -190,8 +190,37 @@ constexpr bool can_promote(A a) noexcept
     return std::in_range<typename internal::promoted_type<A>::name>(a);
 }
 
+/**
+ * @brief Determines whether the the result of evaluating the expression -a matches the result of
+ * evaluating the corresponding mathematical operation -a.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
+ */
 template <std::integral A>
-constexpr bool can_negate(A a) noexcept;
+constexpr bool can_negate(A a) noexcept
+{
+    // Zero can always be negated, yielding zero.
+    static_assert(A{} == -A{} && A{} == 0);
+    if (a == 0) {
+        return true;
+    }
+
+    using A_promoted = typename internal::promoted_type<A>::name;
+
+    // If the promoted type is unsigned, then the negation is 2^N - a, where N is the width of the
+    // promoted type. In this case, zero is the only value which can be negated.
+    if constexpr (std::unsigned_integral<A_promoted>) {
+        return false;
+    }
+    else {
+        // If a is promoted without changing its value, then all values except the minimum are
+        // negatable.
+        static_assert(std::numeric_limits<A_promoted>::min() + 1 ==
+                      -std::numeric_limits<A_promoted>::max());
+        return can_promote(a) && (+a) != std::numeric_limits<A_promoted>::min();
+    }
+}
 
 template <std::integral A>
 constexpr bool can_bitwise_not(A a) noexcept;
@@ -227,13 +256,12 @@ constexpr bool can_add(A a, B b) noexcept
         return internal::builtin_can_add(a, b);
     }
 
-    using C = internal::common_type<A, B>::name;
-
     if (!can_promote(a) || !can_promote(b)) {
         return false;
     }
 
     // Get the values of a and b after integer promotion and usual arithmetic conversion.
+    using C = internal::common_type<A, B>::name;
     const auto promoted_a = static_cast<C>(+a);
     const auto promoted_b = static_cast<C>(+b);
 
@@ -263,13 +291,12 @@ constexpr bool can_subtract(A a, B b) noexcept
         return internal::builtin_can_sub(a, b);
     }
 
-    using C = internal::common_type<A, B>::name;
-
     if (!can_promote(a) || !can_promote(b)) {
         return false;
     }
 
     // Get the values of a and b after integer promotion and usual arithmetic conversion.
+    using C = internal::common_type<A, B>::name;
     const auto promoted_a = static_cast<C>(+a);
     const auto promoted_b = static_cast<C>(+b);
 
