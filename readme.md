@@ -14,7 +14,7 @@ On balance, I think there is probably space for both 'check-after' and 'check-be
 | Function | Implemented? | Notes |
 | -------- | ------------ | ----- |
 | can_convert | ✅ | Trivial range check using the result type.
-| can_convert_modular | ❌ |
+| can_convert_modular | ✅ | Always true (since C++20).
 | can_increment | ✅ |
 | can_decrement | ✅ |
 | can_promote | ✅ | Trivial range check using the promoted type. On most platforms, this reduces to `return true`, but there are some tricky cases where integers have unusual numbers padding bits (see the proposal paper for an example).

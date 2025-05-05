@@ -67,6 +67,12 @@
         "format": "cpp",
         "print": "cpp",
         "text_encoding": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "cstring": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp",
+        "iomanip": "cpp",
+        "istream": "cpp",
+        "sstream": "cpp"
     },
 }

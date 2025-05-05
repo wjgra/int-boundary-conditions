@@ -148,8 +148,21 @@ constexpr bool can_convert(A a) noexcept
     return std::in_range<R>(a);
 }
 
+/**
+ * @brief Determines whether the the result of evaluating the expression static_cast<R>(a) matches
+ * the result of evaluating the corresponding mathematical operation a + 1 modulo N, where N is the
+ * range exponent of the result type.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation modulo N, false otherwise.
+ */
 template <std::integral R, std::integral A>
-constexpr bool can_convert_modular(A a) noexcept;
+constexpr bool can_convert_modular(A a) noexcept
+{
+    // For unsigned integers, this has always been true. For signed integers, this has been true
+    // since C++20.
+    return true;
+}
 
 /**
  * @brief Determines whether the the result of evaluating the expression ++a matches the result of
