@@ -54,8 +54,8 @@ On balance, I think there is probably space for both 'check-after' and 'check-be
 | can_bitwise_and_in_place | ❌ |
 | can_bitwise_xor_in_place | ❌ |
 | can_bitwise_or_in_place | ❌ |
-| can_add_in_place_modular | ❌ |
-| can_subtract_in_place_modular | ❌ |
+| can_add_in_place_modular | ✅ |
+| can_subtract_in_place_modular | ✅ |
 | can_multiply_in_place_modular | ❌ |
 | can_shift_left_in_place_modular | ❌ |
 | can_shift_right_in_place_modular | ❌ |

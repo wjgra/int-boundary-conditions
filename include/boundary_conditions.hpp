@@ -424,11 +424,36 @@ constexpr bool can_bitwise_xor_in_place(A a, B b) noexcept;
 template <std::integral A, std::integral B>
 constexpr bool can_bitwise_or_in_place(A a, B b) noexcept;
 
+/**
+ * @brief Determines whether the the result of evaluating the expression a += b matches the result
+ * of evaluating the corresponding mathematical operation a + b modulo N, where N is the
+ * range exponent of the result type.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation modulo N, false otherwise.
+ */
 template <std::integral A, std::integral B>
-constexpr bool can_add_in_place_modular(A a, B b) noexcept;
+constexpr bool can_add_in_place_modular(A a, B b) noexcept
+{
+    // Since a +=b <=> a = (a + b), cannot add in place unless result fits into common type of a and
+    // b. Therefore modular addition required non-modular addition to be possible too.
+    return can_add(a, b) && can_convert_modular<A>(a + b);
+}
 
+/**
+ * @brief Determines whether the the result of evaluating the expression a -= b matches the result
+ * of evaluating the corresponding mathematical operation a - b modulo N, where N is the
+ * range exponent of the result type.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation modulo N, false otherwise.
+ */
 template <std::integral A, std::integral B>
-constexpr bool can_subtract_in_place_modular(A a, B b) noexcept;
+constexpr bool can_subtract_in_place_modular(A a, B b) noexcept
+{
+    // Corresponding considerations to those described wrt can_add_in_place_modular
+    return can_subtract(a, b) && can_convert_modular<A>(a - b);
+}
 
 template <std::integral A, std::integral B>
 constexpr bool can_multiply_in_place_modular(A a, B b) noexcept;
