@@ -238,14 +238,43 @@ constexpr bool can_negate(A a) noexcept
 template <std::integral A>
 constexpr bool can_bitwise_not(A a) noexcept;
 
+/**
+ * @brief Determines whether the the result of evaluating the expression ++a matches the result
+ * of evaluating the corresponding mathematical operation a + 1 modulo N, where N is the
+ * range exponent of the result type.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation modulo N, false otherwise.
+ */
 template <std::integral A>
-constexpr bool can_increment_modular(A a) noexcept;
+constexpr bool can_increment_modular(A a) noexcept
+{
+    return can_add_in_place_modular(a, 1);
+}
 
+/**
+ * @brief Determines whether the the result of evaluating the expression --a matches the result
+ * of evaluating the corresponding mathematical operation a - 1 modulo N, where N is the
+ * range exponent of the result type.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation modulo N, false otherwise.
+ */
 template <std::integral A>
-constexpr bool can_decrement_modular(A a) noexcept;
+constexpr bool can_decrement_modular(A a) noexcept
+{
+    return can_subtract_in_place_modular(a, 1);
+}
 
+/**
+ * @brief NOT IMPLEMENTED
+ */
 template <std::integral A>
-constexpr bool can_promote_modular(A a) noexcept;
+constexpr bool can_promote_modular(A a) noexcept
+{
+    // Temp implementation - to consider how this differs from can_promote()
+    return can_promote(a);
+}
 
 template <std::integral A>
 constexpr bool can_negate_modular(A a) noexcept;
@@ -439,7 +468,7 @@ constexpr bool can_add_in_place_modular(A a, B b) noexcept
 
     if (!can_promote(a) || !can_promote(b)) {
         // WJG: Consider whether it is possible for errant promotions to yield the correct result
-        // mod N.
+        // mod N. How does this relate to can_promote_modular(a)?
         return false;
     }
 
@@ -475,7 +504,7 @@ constexpr bool can_subtract_in_place_modular(A a, B b) noexcept
 
     if (!can_promote(a) || !can_promote(b)) {
         // WJG: Consider whether it is possible for errant promotions to yield the correct result
-        // mod N.
+        // mod N. How does this relate to can_promote_modular(a)?
         return false;
     }
 
