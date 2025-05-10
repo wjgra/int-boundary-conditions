@@ -200,6 +200,21 @@ constexpr bool can_decrement(A a) noexcept
 template <std::integral A>
 constexpr bool can_promote(A a) noexcept
 {
+    /**
+     * This is nearly always identically true, but there are edge cases where padding bits are
+     * included in the standard integral types. Here is an example from P1619R2.
+     *
+     * Consider an implemntation with the following types:
+     * Type      Size    Range exponent    Padding bits
+     * short     8       48                16
+     * int       8       32                32
+     * unsigned  8       32                32
+     * long      8       64                none
+     *
+     * Here, short promotes to unsigned, leading to the following:
+     * short a = -1;
+     * a += 1; // 0x100000000s
+     */
     return std::in_range<typename internal::promoted_type<A>::name>(a);
 }
 
