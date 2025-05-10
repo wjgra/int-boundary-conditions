@@ -150,11 +150,11 @@ constexpr bool can_convert(A a) noexcept
 
 /**
  * @brief Determines whether the the result of evaluating the expression static_cast<R>(a) matches
- * the result of evaluating the corresponding mathematical operation a + 1 modulo N, where N is the
- * range exponent of the result type.
+ * the result of evaluating the corresponding mathematical operation a + 1 modulo 2^N, where N is
+ * the range exponent of the result type.
  * @param a an integer
  * @return true if the result of evaluating the expression matches the result of evaluating the
- * corresponding mathematical operation modulo N, false otherwise.
+ * corresponding mathematical operation modulo 2^N, false otherwise.
  */
 template <std::integral R, std::integral A>
 constexpr bool can_convert_modular(A a) noexcept
@@ -204,7 +204,7 @@ constexpr bool can_promote(A a) noexcept
      * This is nearly always identically true, but there are edge cases where padding bits are
      * included in the standard integral types. Here is an example from P1619R2.
      *
-     * Consider an implemntation with the following types:
+     * Consider an implementation with the following types:
      * Type      Size    Range exponent    Padding bits
      * short     8       48                16
      * int       8       32                32
@@ -255,11 +255,11 @@ constexpr bool can_bitwise_not(A a) noexcept;
 
 /**
  * @brief Determines whether the the result of evaluating the expression ++a matches the result
- * of evaluating the corresponding mathematical operation a + 1 modulo N, where N is the
+ * of evaluating the corresponding mathematical operation a + 1 modulo 2^N, where N is the
  * range exponent of the result type.
  * @param a an integer
  * @return true if the result of evaluating the expression matches the result of evaluating the
- * corresponding mathematical operation modulo N, false otherwise.
+ * corresponding mathematical operation modulo 2^N, false otherwise.
  */
 template <std::integral A>
 constexpr bool can_increment_modular(A a) noexcept
@@ -269,11 +269,11 @@ constexpr bool can_increment_modular(A a) noexcept
 
 /**
  * @brief Determines whether the the result of evaluating the expression --a matches the result
- * of evaluating the corresponding mathematical operation a - 1 modulo N, where N is the
+ * of evaluating the corresponding mathematical operation a - 1 modulo 2^N, where N is the
  * range exponent of the result type.
  * @param a an integer
  * @return true if the result of evaluating the expression matches the result of evaluating the
- * corresponding mathematical operation modulo N, false otherwise.
+ * corresponding mathematical operation modulo 2^N, false otherwise.
  */
 template <std::integral A>
 constexpr bool can_decrement_modular(A a) noexcept
@@ -282,13 +282,22 @@ constexpr bool can_decrement_modular(A a) noexcept
 }
 
 /**
- * @brief NOT IMPLEMENTED
+ * @brief Determines whether the the result of evaluating the expression +a matches the result of
+ * evaluating the corresponding mathematical operation a modulo 2^N, where N is the
+ * range exponent of the result type.
+ * @param a an integer
+ * @return true if the result of evaluating the expression matches the result of evaluating the
+ * corresponding mathematical operation, false otherwise.
  */
 template <std::integral A>
 constexpr bool can_promote_modular(A a) noexcept
 {
-    // Temp implementation - to consider how this differs from can_promote()
-    return can_promote(a);
+    /**
+     * WJG: I think this is identically true. Consider the example given under can_promote.
+     * In this case, -1 is congruent to 0x100000000 modulo 0x100000000 == 2^32. Since 32 is the
+     * range exponent of unsigned, this promotion is okay.
+     */
+    return true;
 }
 
 template <std::integral A>
@@ -470,11 +479,11 @@ constexpr bool can_bitwise_or_in_place(A a, B b) noexcept;
 
 /**
  * @brief Determines whether the the result of evaluating the expression a += b matches the result
- * of evaluating the corresponding mathematical operation a + b modulo N, where N is the
+ * of evaluating the corresponding mathematical operation a + b modulo 2^N, where N is the
  * range exponent of the result type.
  * @param a an integer
  * @return true if the result of evaluating the expression matches the result of evaluating the
- * corresponding mathematical operation modulo N, false otherwise.
+ * corresponding mathematical operation modulo 2^N, false otherwise.
  */
 template <std::integral A, std::integral B>
 constexpr bool can_add_in_place_modular(A a, B b) noexcept
@@ -494,7 +503,7 @@ constexpr bool can_add_in_place_modular(A a, B b) noexcept
 
     // Check result fits in common type C - if it doesn't return false unless a) C is unsigned, so
     // overflow is well-defined and b) C is the same as the result type, so the overflow is
-    // equivalent to operations modulo N.
+    // equivalent to operations modulo 2^N.
     if (promoted_b > 0 && promoted_a > (std::numeric_limits<C>::max() - promoted_b)) {
         return std::unsigned_integral<C> && std::is_same<C, A>();
     }
@@ -506,11 +515,11 @@ constexpr bool can_add_in_place_modular(A a, B b) noexcept
 
 /**
  * @brief Determines whether the the result of evaluating the expression a -= b matches the result
- * of evaluating the corresponding mathematical operation a - b modulo N, where N is the
+ * of evaluating the corresponding mathematical operation a - b modulo 2^N, where N is the
  * range exponent of the result type.
  * @param a an integer
  * @return true if the result of evaluating the expression matches the result of evaluating the
- * corresponding mathematical operation modulo N, false otherwise.
+ * corresponding mathematical operation modulo 2^N, false otherwise.
  */
 template <std::integral A, std::integral B>
 constexpr bool can_subtract_in_place_modular(A a, B b) noexcept
@@ -530,7 +539,7 @@ constexpr bool can_subtract_in_place_modular(A a, B b) noexcept
 
     // Check result fits in common type C - if it doesn't return false unless a) C is unsigned, so
     // overflow is well-defined and b) C is the same as the result type, so the overflow is
-    // equivalent to operations modulo N.
+    // equivalent to operations modulo 2^N.
     if (promoted_b > 0 && promoted_a < (std::numeric_limits<C>::max() + promoted_b)) {
         return std::unsigned_integral<C> && std::is_same<C, A>();
     }
