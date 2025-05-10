@@ -25,7 +25,7 @@ On balance, I think there is probably space for both 'check-after' and 'check-be
 | can_promote_modular | ❌ |
 | can_negate_modular | ❌ |
 | can_bitwise_not_modular | ❌ |
-| can_add | ✅ | Makes use of the [`__builtin_add_overflow_p` intrinsic](https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html) if available, which seems to be well-optimised on GCC. Otherwise the promotions, conversions and bounds checks are performed explictitly (further work is required to improve the code generation here). An alternative approach modelled on the description of this intrinsic would be to convert to a large int type to perform the calculation then cast back to the result type to check agreement.
+| can_add | ✅ | Makes use of the [`__builtin_add_overflow_p` intrinsic](https://gcc.gnu.org/onlinedocs/gcc/Integer-Overflow-Builtins.html) if available, which seems to be well-optimised on GCC. Otherwise the promotions, conversions and bounds checks are performed explicitly (further work is required to improve the code generation here). An alternative approach modelled on the description of this intrinsic would be to convert to a large int type to perform the calculation then cast back to the result type to check agreement.
 | can_subtract | ✅ | Similar considerations as for `can_add`.
 | can_multiply | ❌ |
 | can_divide | ❌ |
