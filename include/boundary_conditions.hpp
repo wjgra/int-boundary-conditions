@@ -435,9 +435,29 @@ constexpr bool can_bitwise_or_in_place(A a, B b) noexcept;
 template <std::integral A, std::integral B>
 constexpr bool can_add_in_place_modular(A a, B b) noexcept
 {
-    // Since a +=b <=> a = (a + b), cannot add in place unless result fits into common type of a and
-    // b. Therefore modular addition required non-modular addition to be possible too.
-    return can_add(a, b) && can_convert_modular<A>(a + b);
+    // WJG: I do not think the GCC intrinsics can be used here easily.
+
+    if (!can_promote(a) || !can_promote(b)) {
+        // WJG: Consider whether it is possible for errant promotions to yield the correct result
+        // mod N.
+        return false;
+    }
+
+    // Get the values of a and b after integer promotion and usual arithmetic conversion.
+    using C = internal::common_type<A, B>::name;
+    const auto promoted_a = static_cast<C>(+a);
+    const auto promoted_b = static_cast<C>(+b);
+
+    // Check result fits in common type C - if it doesn't return false unless a) C is unsigned, so
+    // overflow is well-defined and b) C is the same as the result type, so the overflow is
+    // equivalent to operations modulo N.
+    if (promoted_b > 0 && promoted_a > (std::numeric_limits<C>::max() - promoted_b)) {
+        return std::unsigned_integral<C> && std::is_same<C, A>();
+    }
+    if (promoted_b < 0 && promoted_a < (std::numeric_limits<C>::min() - promoted_b)) {
+        return std::unsigned_integral<C> && std::is_same<C, A>();
+    }
+    return true;
 }
 
 /**
@@ -451,8 +471,29 @@ constexpr bool can_add_in_place_modular(A a, B b) noexcept
 template <std::integral A, std::integral B>
 constexpr bool can_subtract_in_place_modular(A a, B b) noexcept
 {
-    // Corresponding considerations to those described wrt can_add_in_place_modular
-    return can_subtract(a, b) && can_convert_modular<A>(a - b);
+    // WJG: I do not think the GCC intrinsics can be used here easily.
+
+    if (!can_promote(a) || !can_promote(b)) {
+        // WJG: Consider whether it is possible for errant promotions to yield the correct result
+        // mod N.
+        return false;
+    }
+
+    // Get the values of a and b after integer promotion and usual arithmetic conversion.
+    using C = internal::common_type<A, B>::name;
+    const auto promoted_a = static_cast<C>(+a);
+    const auto promoted_b = static_cast<C>(+b);
+
+    // Check result fits in common type C - if it doesn't return false unless a) C is unsigned, so
+    // overflow is well-defined and b) C is the same as the result type, so the overflow is
+    // equivalent to operations modulo N.
+    if (promoted_b > 0 && promoted_a < (std::numeric_limits<C>::max() + promoted_b)) {
+        return std::unsigned_integral<C> && std::is_same<C, A>();
+    }
+    if (promoted_b < 0 && promoted_a > (std::numeric_limits<C>::min() + promoted_b)) {
+        return std::unsigned_integral<C> && std::is_same<C, A>();
+    }
+    return true;
 }
 
 template <std::integral A, std::integral B>
